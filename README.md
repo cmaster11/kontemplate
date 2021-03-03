@@ -145,6 +145,9 @@ Commands:
   template <file>
     Template resource sets and print them
 
+  diff [<flags>] <file>
+    Template resources and pass to 'kubectl diff'
+
   apply [<flags>] <file>
     Template resources and pass to 'kubectl apply'
 
@@ -167,6 +170,10 @@ kontemplate template example/prod-cluster.yaml -i some-api
 
 # ... maybe do a dry-run to see what kubectl would do:
 kontemplate apply example/prod-cluster.yaml --dry-run
+
++# ... to get a better idea what changes, maybe do a diff
++#      to see differences between the current "live" object and the new "dry-run" object:
++kontemplate diff example/prod-cluster.yaml
 
 # And actually apply it if you like what you see:
 kontemplate apply example/prod-cluster.yaml
