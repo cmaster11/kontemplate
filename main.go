@@ -50,6 +50,10 @@ var (
 	applyDryRun       = apply.Flag("dry-run", "Print remote operations without executing them (--dry-run=client)").Default("false").Bool()
 	applyDryRunServer = apply.Flag("dry-run-server", "Print remote operations without executing them (--dry-run=server)").Default("false").Bool()
 
+	diff       = app.Command("diff", "Template resources and pass to 'kubectl diff'")
+	diffFile   = diff.Arg("file", "Cluster configuration file to use").Required().String()
+	diffServer = diff.Flag("diff-run-server", "Diff remote operations on server (without execution) (--server-side=true)").Default("false").Bool()
+
 	replace     = app.Command("replace", "Template resources and pass to 'kubectl replace'")
 	replaceFile = replace.Arg("file", "Cluster configuration file to use").Required().String()
 
@@ -68,6 +72,9 @@ func main() {
 	switch kingpin.MustParse(app.Parse(os.Args[1:])) {
 	case template.FullCommand():
 		templateCommand()
+
+	case diff.FullCommand():
+		diffCommand()
 
 	case apply.FullCommand():
 		applyCommand()
@@ -139,6 +146,22 @@ func templateIntoDirectory(outputDir *string, rs templater.RenderedResourceSet) 
 		if err != nil {
 			app.Fatalf("Error writing file %s: %v\n", filename, err)
 		}
+	}
+}
+
+func diffCommand() {
+	ctx, resources := loadContextAndResources(diffFile)
+
+	var kubectlArgs []string
+
+	if *diffServer {
+		kubectlArgs = []string{"diff", "-f", "-", "--server-side=true"}
+	} else {
+		kubectlArgs = []string{"diff", "-f", "-"}
+	}
+
+	if err := runKubectlWithResources(ctx, &kubectlArgs, resources); err != nil {
+		failWithKubectlError(err)
 	}
 }
 
@@ -233,6 +256,14 @@ func runKubectlWithResources(c *context.Context, kubectlArgs *[]string, resource
 		stdin.Close()
 
 		if err = kubectl.Wait(); err != nil {
+			// kubectl diff exit status:
+			//  0 No differences were found.
+			//  1 Differences were found.
+			//  >1 Kubectl or diff failed with an error.
+			// so handle the exit code 1 here
+			if (*kubectlArgs)[0] == "diff" && err.Error() == "exit status 1" {
+				return nil
+			}
 			return err
 		}
 	}
