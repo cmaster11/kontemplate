@@ -165,8 +165,11 @@ Examples:
 # Look at output for a specific resource set and check to see if it's correct ...
 kontemplate template example/prod-cluster.yaml -i some-api
 
-# ... maybe do a dry-run to see what kubectl would do:
-kontemplate apply example/prod-cluster.yaml --dry-run
++# ... maybe do an apply dry-run=client to see what kubectl would do:
+ kontemplate apply example/prod-cluster.yaml --dry-run
+
++# ... or maybe do an apply dry-run=server to see what kubectl would do:
++kontemplate apply example/prod-cluster.yaml --dry-run-server
 
 # And actually apply it if you like what you see:
 kontemplate apply example/prod-cluster.yaml

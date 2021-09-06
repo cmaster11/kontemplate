@@ -45,9 +45,10 @@ var (
 	templateFile      = template.Arg("file", "Cluster configuration file to use").Required().String()
 	templateOutputDir = template.Flag("output", "Output directory in which to save templated files instead of printing them").Short('o').String()
 
-	apply       = app.Command("apply", "Template resources and pass to 'kubectl apply'")
-	applyFile   = apply.Arg("file", "Cluster configuration file to use").Required().String()
-	applyDryRun = apply.Flag("dry-run", "Print remote operations without executing them").Default("false").Bool()
+	apply             = app.Command("apply", "Template resources and pass to 'kubectl apply'")
+	applyFile         = apply.Arg("file", "Cluster configuration file to use").Required().String()
+	applyDryRun       = apply.Flag("dry-run", "Print remote operations without executing them (--dry-run=client)").Default("false").Bool()
+	applyDryRunServer = apply.Flag("dry-run-server", "Print remote operations without executing them (--dry-run=server)").Default("false").Bool()
 
 	replace     = app.Command("replace", "Template resources and pass to 'kubectl replace'")
 	replaceFile = replace.Arg("file", "Cluster configuration file to use").Required().String()
@@ -147,7 +148,9 @@ func applyCommand() {
 	var kubectlArgs []string
 
 	if *applyDryRun {
-		kubectlArgs = []string{"apply", "-f", "-", "--dry-run"}
+		kubectlArgs = []string{"apply", "-f", "-", "--dry-run=client"}
+	} else if *applyDryRunServer {
+		kubectlArgs = []string{"apply", "-f", "-", "--dry-run=server"}
 	} else {
 		kubectlArgs = []string{"apply", "-f", "-"}
 	}
