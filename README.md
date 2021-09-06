@@ -137,12 +137,14 @@ Flags:
   -h, --help                 Show context-sensitive help (also try --help-long and --help-man).
   -i, --include=INCLUDE ...  Resource sets to include explicitly
   -e, --exclude=EXCLUDE ...  Resource sets to exclude explicitly
+      --var=VAR ...          Provide variables to templates explicitly
+      --kubectl="kubectl"    Path to the kubectl binary (default 'kubectl')
 
 Commands:
   help [<command>...]
     Show help.
 
-  template <file>
+  template [<flags>] <file>
     Template resource sets and print them
 
   diff [<flags>] <file>
@@ -160,6 +162,8 @@ Commands:
   create <file>
     Template resources and pass to 'kubectl create'
 
+  version
+    Show kontemplate version
 ```
 
 Examples:
